@@ -1,0 +1,18 @@
+### Get Ditto pokemon information
+GET http://localhost:3000/pokemon/ditto
+
+
+### Create new pokemon
+POST http://localhost:3000/pokemon
+Content-Type: application/json
+
+{
+  "name": "ditto",
+  "type": "normal",
+  "moves": [
+    "transform"
+  ]  
+}
+
+### 404 endpoints
+GET http://localhost:3000/notfoundendpoint
