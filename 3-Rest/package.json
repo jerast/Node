@@ -1,0 +1,33 @@
+{
+  "name": "rest",
+  "version": "1.0.0",
+  "description": "Tercera clase de Node.js con midudev",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --watch app.js",
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jerast/Node.git"
+  },
+  "keywords": [
+    "node",
+    "nodejs",
+    "learning",
+    "apis",
+    "rest",
+    "software arquitecture"
+  ],
+  "author": "Jerast",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jerast/Node/issues"
+  },
+  "homepage": "https://github.com/jerast/Node#readme",
+  "dependencies": {
+    "cors": "2.8.5",
+    "express": "4.19.2",
+    "zod": "3.23.8"
+  }
+}
