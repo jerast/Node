@@ -2,10 +2,6 @@
   "name": "node-repo",
   "version": "1.0.0",
   "description": "Repositorio de aprendizaje y projectos basados en Node",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jerast/Node.git"
@@ -13,7 +9,11 @@
   "keywords": [
     "node",
     "nodejs",
-    "learning"
+    "learning",
+    "api",
+    "rest",
+    "mvc",
+    "backend"
   ],
   "author": "Jerast",
   "license": "ISC",

@@ -4,8 +4,7 @@
   "description": "Tercera clase de Node.js con midudev",
   "main": "index.js",
   "scripts": {
-    "dev": "node --watch app.js",
-    "start": "node app.js"
+    "app": "node --watch app.js"
   },
   "repository": {
     "type": "git",
@@ -16,15 +15,9 @@
     "nodejs",
     "learning",
     "apis",
-    "rest",
-    "software arquitecture"
+    "rest"
   ],
   "author": "Jerast",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/jerast/Node/issues"
-  },
-  "homepage": "https://github.com/jerast/Node#readme",
   "dependencies": {
     "cors": "2.8.5",
     "express": "4.19.2",

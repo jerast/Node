@@ -4,13 +4,9 @@
   "description": "Segunda clase de Node.js con midudev",
   "main": "index.js",
   "scripts": {
-    "http": "nodemon 1.http.js",
-    "routing": "nodemon 2.routing.js",
+    "http": "node --watch 1.http.js",
+    "routing": "node --watch 2.routing.js",
     "express": "node --watch 3.express.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/jerast/Node.git"
   },
   "keywords": [
     "node",
@@ -20,18 +16,7 @@
   ],
   "author": "Jerast",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/jerast/Node/issues"
-  },
-  "homepage": "https://github.com/jerast/Node#readme",
-  "devDependencies": {
-    "nodemon": "^3.1.4",
-    "standard": "^17.1.0"
-  },
   "dependencies": {
     "express": "4.19.2"
-  },
-  "eslintConfig": {
-    "extends": "standard"
   }
 }
