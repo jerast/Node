@@ -1,0 +1,32 @@
+{
+  "name": "mvc",
+  "version": "1.0.0",
+  "description": "Cuarta clase de Node.js con midudev",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "app": "node --watch app.js",
+    "web": "http-server ./web"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jerast/Node.git"
+  },
+  "keywords": [
+    "node",
+    "nodejs",
+    "learning",
+    "apis",
+    "rest",
+    "mvc",
+    "architecture",
+    "pattern"
+  ],
+  "author": "Jerast",
+  "dependencies": {
+    "cors": "2.8.5",
+    "express": "4.19.2",
+    "mongodb": "6.7.0",
+    "zod": "3.23.8"
+  }
+}
