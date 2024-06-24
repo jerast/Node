@@ -1,0 +1,33 @@
+{
+  "name": "db",
+  "version": "1.0.0",
+  "description": "Quinta clase de Node.js con midudev",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "app": "node --watch app.js",
+    "web": "http-server ./web"
+  },
+  "keywords": [
+    "node",
+    "nodejs",
+    "learning",
+    "apis",
+    "rest",
+    "mvc",
+    "architecture",
+    "pattern",
+    "mysql",
+    "database",
+    "clean code",
+    "security"
+  ],
+  "author": "Jerast",
+  "dependencies": {
+    "cors": "2.8.5",
+    "express": "4.19.2",
+    "mongodb": "6.7.0",
+    "mysql2": "3.10.1",
+    "zod": "3.23.8"
+  }
+}

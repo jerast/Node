@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Rest Testing</title>
+  <style>
+    * { 
+      font-family: 'Roboto'; 
+      background-color: #222; 
+      color: #CCC; 
+    }
+    main { 
+      height: 100%; 
+      width: 100%; 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 10px; 
+      justify-content: center; 
+    }
+    h2 { 
+      text-wrap: nowrap; 
+      text-overflow: ellipsis; 
+      overflow: hidden; 
+      width: 100%;
+      text-align: center;
+    }
+    article { 
+      margin-bottom: 1rem; 
+      width: 130px; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+    }
+    img { 
+      height: 200px; 
+      width: 100%; 
+      object-fit: cover; 
+      object-position: center; 
+      border-radius: 12px; 
+    }
+    button { 
+      background-color: #922; 
+      color: #CCC; 
+      border: none; 
+      font-weight: 700; 
+      padding: 5px 20px; 
+      margin-top: 5px; 
+      border-radius: 20px; 
+      cursor: pointer; 
+      transition: cubic-bezier(0.075, 0.82, 0.165, 1); 
+      transition-duration: .5s; 
+      width: fit-content; 
+    }
+    button:hover { 
+      background-color: #CCC; 
+      color: #222; 
+    }
+  </style>
+  <script type="module">
+    fetch('http://localhost:3000/movies')
+      .then(res => res.json())
+      .then(movies => {
+        const html = movies.map(movie => {
+          return `
+            <article data-id="${movie.id}">
+              <h2>${movie.title}</h2>
+              <p>${movie.duration} mins.</p>
+              <img src="${movie.poster}" alt="${movie.title} poster"/>
+              <button>Delete</button>
+            </article>
+          `
+        }).join('')
+
+        document.querySelector('main').innerHTML = html
+
+        document.addEventListener('click', event => {
+          if (event.target.matches('button')) {
+            const article = event.target.closest('article')
+            const id = article.dataset.id
+
+            fetch(`http://localhost:3000/movies/${id}`, { method: 'DELETE' })
+              .then(res => res.json())
+              .then(res => {
+                if (res.ok) {
+                  article.remove()
+                }
+              })
+          }
+        })
+      })
+      .catch(error => {
+        document.querySelector('main').innerText = `Something failed: ${error}`
+      })
+  </script>
+</head>
+<body>
+  <main></main>
+</body>
+</html>
