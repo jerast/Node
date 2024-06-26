@@ -8,11 +8,15 @@ GET http://localhost:3000/movies?page=2
 
 
 ### Recuperar todas las películas por género
-GET http://localhost:3000/movies?genre=Romance
+GET http://localhost:3000/movies?genre=ROMANCE
+
+
+### Recuperar todas las películas por género y página
+GET http://localhost:3000/movies?genre=ACTION&page=2
 
 
 ### Recuperar una película por id
-GET http://localhost:3000/movies/dcdd0fad-a94c-4810-8acc-5f108d3b18c3
+GET http://localhost:3000/movies/51ed3286-3351-11ef-a60d-20689dffc28a
 
 
 ### Crear una película con POST
