@@ -1,20 +1,25 @@
 import express from 'express'
-import moviesRoutes from './routes/movies.routes.js'
 import { corsMiddleware } from './middlewares/cors.js'
+import { moviesRoutes } from './routes/movies.routes.js'
 
-const app = express()
+export const createApp = ({ movieModel }) => {
+  const app = express()
 
-app.disable('x-powered-by')
-app.disable('etag')
+  // disables
+  app.disable('x-powered-by')
+  app.disable('etag')
 
-app.use(express.json())
-app.use(corsMiddleware())
+  // middlewares
+  app.use(express.json())
+  app.use(corsMiddleware())
 
-app.use('/movies', moviesRoutes)
+  // endpoints
+  app.use('/movies', moviesRoutes({ movieModel }))
 
-const PORT = process.env.PORT ?? 3000
-
-app.listen(PORT, () => {
-  console.log(`server listening on http://localhost:${PORT}`)
-})
+  // run server
+  const PORT = process.env.PORT ?? 3000
+  app.listen(PORT, () => {
+    console.log(`server listening on http://localhost:${PORT}`)
+  })
+}
   
