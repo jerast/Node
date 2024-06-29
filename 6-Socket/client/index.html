@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Socket Chat</title>
+  <link rel="shortcut icon" href="https://www.svgrepo.com/show/311169/send.svg" type="image/svg">
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+  <script type="module" >
+    import { io } from 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.esm.min.js'
+
+    // user ID
+    localStorage.getItem('socket-uuid') ?? localStorage.setItem('socket-uuid', 'user-'+crypto.randomUUID().slice(0,13))
+    const userID = localStorage.getItem('socket-uuid')
+       
+    // Items
+    const messages = document.getElementById('messages')
+    const form = document.getElementById('form')
+    const input = document.getElementById('input')
+    const button = document.getElementById('submit')
+
+    // Socket
+    const socket = io({
+      auth: { 
+        serverOffset: 0,
+        user: userID
+      }
+    })
+
+    // Messages
+    const addMessage = (who, message) => {
+      const lastMessageBlock = document.querySelector('#messages ul:last-of-type')
+      
+      if (lastMessageBlock?.className !== who) {
+        messages.insertAdjacentHTML('beforeend', `<ul class="${who}"></ul>`)
+      }
+
+      const currentMessageBlock = document.querySelector(`#messages .${who}:last-of-type`)
+      currentMessageBlock.insertAdjacentHTML('beforeend', `<li>${message}</li>`)
+    }
+
+    socket.on('chat message', ({ id, user, content }) => {
+      user === userID 
+        ? addMessage('me', content)
+        : addMessage(user, content) 
+
+      socket.auth.serverOffset = id
+
+      messages.scrollTop = messages.scrollHeight
+    })
+
+    // Submit messages
+    input.addEventListener('input', event => {
+      if (event.srcElement.value) {
+        // socket.emit('writing', true)
+        button.style.display = 'block'
+        return
+      }
+
+      button.style.display = 'none'
+    })
+
+    form.addEventListener('submit', event => {
+      event.preventDefault()
+
+      if (input.value) {
+        socket.emit('chat message', {
+          user: userID,
+          content: input.value,
+        })
+
+        input.value = ''
+        button.style.display = 'none'
+      }
+    })
+  </script>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    * {
+      color-scheme: dark;
+      /* transition: all .4s ease-in-out; */
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui;
+      display: grid;
+      place-content: center;
+      height: 100dvh;
+      padding: 36px 12px;
+      grid-template-rows: 1fr;
+    }
+
+    #chat {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      max-width: 350px;
+      width: calc(100vw - 24px);
+      height: 100%;
+      background: #ddd1;
+      padding: 0px 12px 12px 12px;
+      border-radius: 36px;
+      box-shadow: 4px 4px 12px #0002;
+      overflow: hidden;
+    }
+
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      /* scroll-behavior: smooth; */
+    }
+    #messages::-webkit-scrollbar {
+      display: none; /* Chrome, Safari and Opera */
+    }
+    #messages {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+    
+    #messages > ul {
+      padding: 0px;
+      list-style-type: none;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      margin: 0px 0px;
+    }
+
+    #messages > ul:first-of-type {
+      margin-top: 28px;
+    }
+    #messages > ul:not(:first-of-type) {
+      margin-top: 16px;
+    }
+    #messages > ul:last-of-type {
+      margin-bottom: 16px;
+    }
+
+    #messages > ul.me {
+      align-items: end;
+    }
+
+    #messages > ul:not(.me) {
+      align-items: start;
+    }
+    
+    #messages > ul > li {
+      width: fit-content;
+      max-width: 80%;
+      color: #eee;
+      font-size: 14px;
+      padding: 10px 16px;
+      /* box-shadow: 4px 4px 4px #0002; */
+      overflow-wrap: break-word;
+    }
+
+    #messages > ul.me > li {
+      background-color: #8e2bc6;
+      border-top-left-radius: 19px;
+      border-bottom-left-radius: 19px;
+    }
+    
+    #messages > ul.me > li:first-of-type {
+      border-top-right-radius: 19px;
+    }
+    #messages > ul.me > li:not(:first-of-type) {
+      border-top-right-radius: 4px;
+    }
+
+    #messages > ul.me > li:last-of-type {
+      border-bottom-right-radius: 19px;
+    }
+    #messages > ul.me > li:not(:last-of-type) {
+      border-bottom-right-radius: 4px;
+    }
+
+    #messages > ul:not(.me) > li {
+      background-color: #444;
+      border-top-right-radius: 19px;
+      border-bottom-right-radius: 19px;
+    }
+
+    #messages > ul:not(.me) > li:first-of-type {
+      border-top-left-radius: 19px;
+    }
+    #messages > ul:not(.me) > li:not(:first-of-type) {
+      border-top-left-radius: 4px;
+    }
+
+    #messages > ul:not(.me) > li:last-of-type {
+      border-bottom-left-radius: 19px;
+    }
+    #messages > ul:not(.me) > li:not(:last-of-type) {
+      border-bottom-left-radius: 4px;
+    }
+
+    #form {
+      display: flex;
+      height: 48px;
+      border-radius: 24px;
+      background-color: #eee1;
+      overflow: hidden;
+      box-shadow: 4px 4px 10px #0004;
+    }
+
+    #form > * {
+      background-color: transparent;
+      outline: none;
+    }
+    
+    #input {
+      margin: 4px;
+      border: none;
+      flex-grow: 1;
+      padding: 0 12px;
+    }
+    
+    #submit {
+      display: none;
+      height: 48px;
+      width: 48px;
+      outline: none;
+      border: none;
+      border-radius: 24px;
+      color: #eee9;
+      padding: 12px;
+      fill: #aaa;
+      cursor: pointer;
+    }
+
+    /* .loader {
+      width: 60px;
+      aspect-ratio: 2;
+      --_g: no-repeat radial-gradient(circle closest-side,#000 90%,#0000);
+      background: 
+        var(--_g) 0%   50%,
+        var(--_g) 50%  50%,
+        var(--_g) 100% 50%;
+      background-size: calc(100%/3) 50%;
+      animation: l3 1s infinite linear;
+    }
+    @keyframes l3 {
+        20%{background-position:0%   0%, 50%  50%,100%  50%}
+        40%{background-position:0% 100%, 50%   0%,100%  50%}
+        60%{background-position:0%  50%, 50% 100%,100%   0%}
+        80%{background-position:0%  50%, 50%  50%,100% 100%}
+    } */
+
+  </style>
+</head>
+<body>
+  <section id="chat">
+    <div id="messages"></div>
+    <!-- <div class="loader"></div> -->
+    <form id="form">
+      <input id="input" placeholder="Type a message" type="text" name="message" autocomplete="off" />
+      <button id="submit" type="submit">
+
+        <svg viewBox="0 0 28 28" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <g id="🔍-Product-Icons" stroke="none" stroke-width="1" fill="inherit" fill-rule="evenodd">
+            <g id="ic_fluent_send_28_filled" fill="inherit" fill-rule="nonzero">
+              <path d="M3.78963301,2.77233335 L24.8609339,12.8499121 C25.4837277,13.1477699 25.7471402,13.8941055 25.4492823,14.5168992 C25.326107,14.7744476 25.1184823,14.9820723 24.8609339,15.1052476 L3.78963301,25.1828263 C3.16683929,25.4806842 2.42050372,25.2172716 2.12264586,24.5944779 C1.99321184,24.3238431 1.96542524,24.015685 2.04435886,23.7262618 L4.15190935,15.9983421 C4.204709,15.8047375 4.36814355,15.6614577 4.56699265,15.634447 L14.7775879,14.2474874 C14.8655834,14.2349166 14.938494,14.177091 14.9721837,14.0981464 L14.9897199,14.0353553 C15.0064567,13.9181981 14.9390703,13.8084248 14.8334007,13.7671556 L14.7775879,13.7525126 L4.57894108,12.3655968 C4.38011873,12.3385589 4.21671819,12.1952832 4.16392965,12.0016992 L2.04435886,4.22889788 C1.8627142,3.56286745 2.25538645,2.87569101 2.92141688,2.69404635 C3.21084015,2.61511273 3.51899823,2.64289932 3.78963301,2.77233335 Z" id="🎨-Color"></path>
+            </g>
+          </g>
+        </svg>
+
+      </button>
+    </form>
+  </section>
+</body>
+</html>
