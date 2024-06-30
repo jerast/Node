@@ -16,11 +16,11 @@ const db = createClient({
   authToken: process.env.SOCKET_TURSODB_TOKEN
 })
 
-await db.execute(`DROP TABLE IF EXISTS messages`)
+// await db.execute(`DROP TABLE IF EXISTS messages`)
 await db.execute(`
   CREATE TABLE IF NOT EXISTS messages (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user INTEGER,
+    user TEXT,
     content TEXT
   )
 `)
@@ -28,20 +28,17 @@ await db.execute(`
 io.on('connection', async (socket) => {
   console.log(`User ${socket.handshake.auth.user} has benn connected!`)
 
-  socket.on('disconnect', () => {
-    console.log(`an ${socket.handshake.auth.user} has disconnected!`)
-  })
-
-  socket.on('chat message', async (message) => {
+  socket.on('send message', async (message) => {
     try {
       const result = await db.execute({
         sql: 'INSERT INTO messages (user, content) VALUES (:user, :content)',
         args: message
       })
 
-      io.emit('chat message', { 
+      io.emit('send message', { 
         id: result.lastInsertRowid.toString(), 
-        ...message 
+        ...message,
+        isNew: true,
       })
     } 
     catch (error) {
@@ -51,14 +48,20 @@ io.on('connection', async (socket) => {
 
   if (!socket.recovered) {
     try {
-      const results = await db.execute({
+      const { rows } = await db.execute({
         sql: 'SELECT id, user, content FROM messages WHERE id > ?',
         args: [socket.handshake.auth.serverOffset ?? 0]
       })
 
-      results.rows.forEach(message => {
-        socket.emit('chat message', message)
-      })
+      if (socket.handshake.auth.serverOffset === 0) { // <-- New Connections
+        socket.emit('load messages', rows.reverse())
+      }
+
+      if (socket.handshake.auth.serverOffset > 0) { // <-- Reconnections
+        rows.forEach(message => {
+          socket.emit('send message', { ...message, isNew: true })
+        })
+      }
     } 
     catch (error) {
       console.log(error)

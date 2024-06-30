@@ -5,21 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Web Socket Chat</title>
   <link rel="shortcut icon" href="https://www.svgrepo.com/show/311169/send.svg" type="image/svg">
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
   <script type="module" >
     import { io } from 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.esm.min.js'
 
-    // user ID
-    localStorage.getItem('socket-uuid') ?? localStorage.setItem('socket-uuid', 'user-'+crypto.randomUUID().slice(0,13))
+    /* User ID */
+    localStorage.getItem('socket-uuid') ?? localStorage.setItem('socket-uuid', 'u-'+crypto.randomUUID().slice(0,8))
     const userID = localStorage.getItem('socket-uuid')
        
-    // Items
+    /* Items */
     const messages = document.getElementById('messages')
     const form = document.getElementById('form')
     const input = document.getElementById('input')
     const button = document.getElementById('submit')
 
-    // Socket
+    /* Socket */
     const socket = io({
       auth: { 
         serverOffset: 0,
@@ -27,50 +26,60 @@
       }
     })
 
-    // Messages
-    const addMessage = (who, message) => {
-      const lastMessageBlock = document.querySelector('#messages ul:last-of-type')
+    /* Messages */
+    const addMessage = ({ id, user, content, isNew }) => {
+      const person = (user === userID) ? 'me' : user
+      const position = isNew ? 'beforeend' : 'afterbegin'
+      const location = isNew ? 'last' : 'first'
       
-      if (lastMessageBlock?.className !== who) {
-        messages.insertAdjacentHTML('beforeend', `<ul class="${who}"></ul>`)
+      const lastMessageBlock = document.querySelector(`#messages ul:${location}-of-type`)
+      
+      if (lastMessageBlock?.className !== person) {
+        messages.insertAdjacentHTML(position, `<ul class="${person}"></ul>`)
       }
 
-      const currentMessageBlock = document.querySelector(`#messages .${who}:last-of-type`)
-      currentMessageBlock.insertAdjacentHTML('beforeend', `<li>${message}</li>`)
-    }
-
-    socket.on('chat message', ({ id, user, content }) => {
-      user === userID 
-        ? addMessage('me', content)
-        : addMessage(user, content) 
-
-      socket.auth.serverOffset = id
+      const currentMessageBlock = document.querySelector(`#messages ul:${location}-of-type`)
+      currentMessageBlock.insertAdjacentHTML(position, `<li>${content}</li>`)
 
       messages.scrollTop = messages.scrollHeight
+      socket.auth.serverOffset = id
+    }
+
+    /* Server Requests */
+    socket.on('send message', message => addMessage(message))
+    socket.on('load messages', messageList => {
+      messageList.forEach(message => 
+        addMessage({ ...message, isNew: false })
+      )
+      messages.style.scrollBehavior = 'smooth'
     })
 
-    // Submit messages
+    /* Submit messages */
     input.addEventListener('input', event => {
       if (event.srcElement.value) {
         // socket.emit('writing', true)
-        button.style.display = 'block'
+        button.style.opacity = 1
+        button.style.cursor = 'pointer'
         return
       }
 
-      button.style.display = 'none'
+      button.style.opacity = 0
+      button.style.cursor = 'default'
     })
-
+    
     form.addEventListener('submit', event => {
       event.preventDefault()
 
       if (input.value) {
-        socket.emit('chat message', {
+
+        socket.emit('send message', {
           user: userID,
           content: input.value,
         })
-
+        
         input.value = ''
-        button.style.display = 'none'
+        button.style.opacity = 0
+        button.style.cursor = 'default'
       }
     })
   </script>
@@ -101,17 +110,42 @@
       display: flex;
       flex-direction: column;
       max-width: 350px;
+      min-width: 250px;
       width: calc(100vw - 24px);
       height: 100%;
-      background: #ddd1;
-      padding: 0px 12px 12px 12px;
-      border-radius: 36px;
+      background: #242526;
+      border-top-left-radius: 30px;
+      border-top-right-radius: 30px;
+      border-bottom-left-radius: 36px;
+      border-bottom-right-radius: 36px;
       box-shadow: 4px 4px 12px #0002;
       overflow: hidden;
     }
 
+    #user {
+      min-height: 60px;
+      background-color: inherit;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: bolder;
+      box-shadow: 4px 0px 10px #161616;
+      z-index: 1;
+    }
+
+    #user > .image {
+      height: 36px;
+      aspect-ratio: 1/1;
+      background-color: #fff3;
+      border-radius: 50%;
+    }
+
     #messages {
-      flex: 1;
+      max-height: calc(100% - 36px);
+      padding: 16px 12px calc(24px + 12px) 12px;
+      margin-top: auto;
+      margin-bottom: calc(12px + 24px);
       overflow-y: auto;
       /* scroll-behavior: smooth; */
     }
@@ -126,87 +160,83 @@
     #messages > ul {
       padding: 0px;
       list-style-type: none;
-      display: flex;
-      flex-direction: column;
+      display: grid;
       gap: 3px;
-      margin: 0px 0px;
+      margin: 0;
     }
 
-    #messages > ul:first-of-type {
-      margin-top: 28px;
-    }
     #messages > ul:not(:first-of-type) {
-      margin-top: 16px;
-    }
-    #messages > ul:last-of-type {
-      margin-bottom: 16px;
+      margin-top: 12px;
     }
 
     #messages > ul.me {
-      align-items: end;
+      justify-items: end;
     }
-
     #messages > ul:not(.me) {
-      align-items: start;
+      justify-items: start;
     }
     
     #messages > ul > li {
       width: fit-content;
       max-width: 80%;
       color: #eee;
-      font-size: 14px;
+      font-size: 13px;
       padding: 10px 16px;
-      /* box-shadow: 4px 4px 4px #0002; */
       overflow-wrap: break-word;
+      /* box-shadow: 4px 4px 4px #0002; */
     }
 
     #messages > ul.me > li {
-      background-color: #8e2bc6;
-      border-top-left-radius: 19px;
-      border-bottom-left-radius: 19px;
+      background-color: #4d2bc6;
+      border-top-left-radius: 18px;
+      border-bottom-left-radius: 18px;
     }
     
     #messages > ul.me > li:first-of-type {
-      border-top-right-radius: 19px;
+      border-top-right-radius: 18px;
     }
     #messages > ul.me > li:not(:first-of-type) {
       border-top-right-radius: 4px;
     }
 
     #messages > ul.me > li:last-of-type {
-      border-bottom-right-radius: 19px;
+      border-bottom-right-radius: 18px;
     }
     #messages > ul.me > li:not(:last-of-type) {
       border-bottom-right-radius: 4px;
     }
 
     #messages > ul:not(.me) > li {
-      background-color: #444;
-      border-top-right-radius: 19px;
-      border-bottom-right-radius: 19px;
+      background-color: #303030;
+      border-top-right-radius: 18px;
+      border-bottom-right-radius: 18px;
     }
 
     #messages > ul:not(.me) > li:first-of-type {
-      border-top-left-radius: 19px;
+      border-top-left-radius: 18px;
     }
     #messages > ul:not(.me) > li:not(:first-of-type) {
       border-top-left-radius: 4px;
     }
 
     #messages > ul:not(.me) > li:last-of-type {
-      border-bottom-left-radius: 19px;
+      border-bottom-left-radius: 18px;
     }
     #messages > ul:not(.me) > li:not(:last-of-type) {
       border-bottom-left-radius: 4px;
     }
 
     #form {
-      display: flex;
+      position: absolute;
+      bottom: 0;
+      width: calc(100% - 24px);
       height: 48px;
+      margin: 12px;
+      display: flex;
       border-radius: 24px;
-      background-color: #eee1;
+      background-color: #3a3b3c;
       overflow: hidden;
-      box-shadow: 4px 4px 10px #0004;
+      box-shadow: 4px 4px 10px #1a1a1a;
     }
 
     #form > * {
@@ -222,16 +252,22 @@
     }
     
     #submit {
-      display: none;
-      height: 48px;
-      width: 48px;
+      opacity: 0;
+      margin: 4px;
+      height: 40px;
+      width: 40px;
       outline: none;
       border: none;
       border-radius: 24px;
-      color: #eee9;
-      padding: 12px;
+      padding: 8px 6px 8px 10px;
       fill: #aaa;
-      cursor: pointer;
+      transition: all .2s ease-in-out;
+    }
+    
+    #submit:hover {
+      transform: rotate(-35deg);
+      background-color: #aaa;
+      fill: #3a3b3c;
     }
 
     /* .loader {
@@ -256,10 +292,16 @@
 </head>
 <body>
   <section id="chat">
+    <div id="user">
+      <div class="image"></div>
+      <span class="name">Username</span>
+      <div class="controls"></div>  
+    </div>
+
     <div id="messages"></div>
     <!-- <div class="loader"></div> -->
     <form id="form">
-      <input id="input" placeholder="Type a message" type="text" name="message" autocomplete="off" />
+      <input id="input" placeholder="Type a message..." type="text" name="message" autocomplete="off" />
       <button id="submit" type="submit">
 
         <svg viewBox="0 0 28 28" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
